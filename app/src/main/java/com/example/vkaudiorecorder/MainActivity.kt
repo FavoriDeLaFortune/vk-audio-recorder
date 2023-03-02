@@ -34,10 +34,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             VKAudioRecorderTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     MainScreen()
                 }
@@ -105,6 +104,7 @@ fun RecordItem(record: Record) {
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
+            Spacer(Modifier.weight(0.1f))
             Text(
                 text = record.durationToString(),
                 modifier = Modifier
@@ -118,37 +118,6 @@ fun RecordItem(record: Record) {
             )
             Spacer(modifier = Modifier.size(8.dp))
         }
-       /* ConstraintLayout {
-            val (title, date, duration, playButton) = createRefs()
-
-            Text(modifier = Modifier.constrainAs(title) {
-                top.linkTo(parent.top, margin = 8.dp)
-                start.linkTo(parent.start, margin = 8.dp)
-                end.linkTo(duration.start, margin = 8.dp)
-                width = Dimension.fillToConstraints
-            }, text = record.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(modifier = Modifier.constrainAs(date) {
-                top.linkTo(title.bottom, margin = 4.dp)
-                start.linkTo(parent.start, margin = 8.dp)
-                bottom.linkTo(parent.bottom, margin = 8.dp)
-            }, text = record.dateToString())
-            Text(modifier = Modifier.constrainAs(duration) {
-                start.linkTo(title.end)
-                end.linkTo(playButton.start, margin = 8.dp)
-                bottom.linkTo(parent.bottom)
-                top.linkTo(parent.top)
-            }, text = record.durationToString())
-            PlayButton(modifier = Modifier
-                .constrainAs(playButton) {
-                    end.linkTo(parent.end, margin = 8.dp)
-                    start.linkTo(duration.end, margin = 4.dp)
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                }
-                .size(36.dp))
-        }
-*/
-
     }
 }
 

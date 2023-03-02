@@ -3,9 +3,15 @@ package com.example.vkaudiorecorder.ui.model
 import java.util.Calendar
 import java.util.Date
 import android.text.format.DateFormat
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlin.time.Duration.Companion.milliseconds
 
-data class Record(val title: String, val date: Date, val duration: Long) {
+@Entity(tableName = "record_table")
+data class Record(val title: String, val date: Date, val duration: Long, val filePath: String) {
+
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0
 
     fun dateToString(): String {
         val recordCal = Calendar.getInstance()
