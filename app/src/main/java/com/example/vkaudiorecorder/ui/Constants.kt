@@ -6,13 +6,20 @@ import java.util.*
 val MOCKED_RECORD_LIST = listOf(
     Record(
         title = "Мальчик спел очень красиво Пирдуху Бабангиды",
-        date = Date(),
-        duration = 2400),
+        date = Date().time,
+        duration = 2400,
+        filePath = ""
+    ),
     Record(
         title = "Пересказываю Войну и мир",
-        date = Date(1234321231231),
-        duration = 1234),
+        date = 1234321231231,
+        duration = 1234,
+        filePath = ""
+    ),
     Record(
         title = "Рыгаю",
-        date = Date(),
-        duration = 1234),)
+        date = Date().time - 86400000,
+        duration = 1234,
+        filePath = ""
+    )
+)

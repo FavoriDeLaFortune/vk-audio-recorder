@@ -5,10 +5,11 @@ import androidx.room.Room
 import com.example.vkaudiorecorder.data.local.database.RecordDatabase
 import com.example.vkaudiorecorder.data.local.repository.LocalRecordRepository
 import com.example.vkaudiorecorder.data.local.repository.LocalRecordRepositoryImpl
+import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val localModule = module {
-    single { provideDatabase(get()) }
+    single { provideDatabase(androidContext()) }
     single<LocalRecordRepository> { LocalRecordRepositoryImpl(get()) }
 }
 

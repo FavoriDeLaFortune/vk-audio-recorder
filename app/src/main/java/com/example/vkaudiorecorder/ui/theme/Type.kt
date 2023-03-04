@@ -20,12 +20,12 @@ val Typography = Typography(
     labelSmall = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
-        fontSize = 12.sp,
+        fontSize = 24.sp,
     ),
     labelMedium = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Thin,
-        fontSize = 24.sp,
+        fontSize = 32.sp,
     ),
     bodyMedium = TextStyle(
         fontFamily = FontFamily.Default,
