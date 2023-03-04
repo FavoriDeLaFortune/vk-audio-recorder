@@ -27,14 +27,14 @@ val Typography = Typography(
         fontWeight = FontWeight.Thin,
         fontSize = 32.sp,
     ),
-    bodyMedium = TextStyle(
+    bodySmall = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Light,
         fontSize = 12.sp,
     ),
-    bodySmall = TextStyle(
+    bodyMedium = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Thin,
-        fontSize = 8.sp,
+        fontWeight = FontWeight.Medium,
+        fontSize = 16.sp,
     ),
 )
