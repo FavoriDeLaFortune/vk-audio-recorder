@@ -1,7 +1,6 @@
 package com.example.vkaudiorecorder
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
@@ -29,7 +28,6 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -37,13 +35,15 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.vkaudiorecorder.ui.MOCKED_RECORD_LIST
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.vkaudiorecorder.data.local.RecordLoadState
 import com.example.vkaudiorecorder.ui.mappers.dateToString
 import com.example.vkaudiorecorder.ui.mappers.durationToString
 import com.example.vkaudiorecorder.ui.model.Record
+import com.example.vkaudiorecorder.ui.stateholders.RecordViewModel
 import com.example.vkaudiorecorder.ui.theme.VKAudioRecorderTheme
 import kotlinx.coroutines.delay
-import kotlin.math.sin
+import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,9 +62,10 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen() {
+fun MainScreen(recordViewModel: RecordViewModel = koinViewModel()) {
     val interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
     val interactions = remember { mutableStateListOf<Interaction>() }
+    val recordStateLoad by recordViewModel.recordsStateFlow.collectAsStateWithLifecycle()
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect { interaction ->
             if (interactions.isNotEmpty()) {
@@ -80,15 +81,27 @@ fun MainScreen() {
                 .padding(start = 16.dp, top = 8.dp, bottom = 24.dp),
             style = MaterialTheme.typography.labelLarge
         )
-        LazyColumn(
-            modifier = Modifier.align(CenterHorizontally),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(MOCKED_RECORD_LIST) { record ->
-                RecordItem(record, interactions)
+        when (recordStateLoad) {
+            is RecordLoadState.Loaded -> {
+                if ((recordStateLoad as RecordLoadState.Loaded).list.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier.align(CenterHorizontally),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items((recordStateLoad as RecordLoadState.Loaded).list) { record ->
+                            RecordItem(record, interactions)
+                        }
+                    }
+                } else {
+                    Text("Список пуст")
+                }
+            }
+            is RecordLoadState.Error -> {
+                Text("Произошла ошибка")
             }
         }
+
     }
     RecordSurface(interactions = interactions)
     RecordSaveCard(interactions = interactions)
@@ -302,10 +315,15 @@ fun PlayButton(modifier: Modifier, interactions: SnapshotStateList<Interaction>)
     }
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
 fun DefaultPreview() {
     VKAudioRecorderTheme {
-        MainScreen()
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            MainScreen()
+        }
     }
 }

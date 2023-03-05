@@ -2,6 +2,7 @@ package com.example.vkaudiorecorder
 
 import android.app.Application
 import com.example.vkaudiorecorder.di.localModule
+import com.example.vkaudiorecorder.di.viewModelModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -15,7 +16,7 @@ class App : Application() {
         startKoin {
             androidLogger(Level.DEBUG)
             androidContext(this@App)
-            modules(localModule)
+            modules(localModule, viewModelModule)
         }
     }
 }

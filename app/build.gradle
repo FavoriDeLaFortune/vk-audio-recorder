@@ -65,11 +65,12 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
     implementation "androidx.compose.material:material-icons-extended:$compose_icons_version"
-    implementation "androidx.compose.runtime:runtime-livedata:$livedata_compose"
+    implementation "androidx.compose.runtime:runtime-livedata:$compose_livedata"
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:$compose_lifecycle"
 
     // Koin
     implementation "io.insert-koin:koin-core:$koin_version"
-    implementation "io.insert-koin:koin-android:$koin_android_version"
+    implementation "io.insert-koin:koin-androidx-compose:$koin_version"
 
     // Room
     implementation "androidx.room:room-runtime:$room_version"
