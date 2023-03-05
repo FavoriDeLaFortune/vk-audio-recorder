@@ -1,18 +1,12 @@
 package com.example.vkaudiorecorder.ui
 
-import com.example.vkaudiorecorder.ui.model.Record
-import java.util.*
-
-val MOCKED_RECORD_LIST = listOf(
-    Record(
-        title = "Мальчик спел очень красиво Пирдуху Бабангиды",
-        date = Date(),
-        duration = 2400),
-    Record(
-        title = "Пересказываю Войну и мир",
-        date = Date(1234321231231),
-        duration = 1234),
-    Record(
-        title = "Рыгаю",
-        date = Date(),
-        duration = 1234),)
+const val TODAY = "Сегодня"
+const val YESTERDAY = "Вчера"
+const val MAIN_TITLE = "Ваши записи"
+const val EMPTY_LIST_MESSAGE = "У вас пока нет записей\nУдерживайте нижнюю кнопку для начала записи"
+const val ERROR_MESSAGE = "Произошла ошибка"
+const val RECORD_SURFACE_TITLE = "Идёт запись"
+const val DISMISS_BUTTON_TEXT = "Отмена"
+const val CONFIRM_BUTTON_TEXT = "Сохранить"
+const val RECORD_SAVE_CARD_TITLE = "Название записи"
+const val CURRENT_RECORD_FILE_PATH = "current_audio.mp3"
