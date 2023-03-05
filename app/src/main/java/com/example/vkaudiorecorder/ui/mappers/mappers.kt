@@ -1,8 +1,9 @@
 package com.example.vkaudiorecorder.ui.mappers
 
 import android.text.format.DateFormat
+import com.example.vkaudiorecorder.ui.TODAY
+import com.example.vkaudiorecorder.ui.YESTERDAY
 import java.util.*
-import kotlin.time.Duration.Companion.milliseconds
 
 fun durationToString(duration: Long) = String.format("%02d:%02d", duration / 60, duration % 60)
 
@@ -20,11 +21,11 @@ fun dateToString(date: Long): String {
 
 
 private fun isTodayOrYesterday(cal: Calendar, currentCal: Calendar): String {
-    val duration = (currentCal.timeInMillis - cal.timeInMillis).milliseconds
-    return if (duration.inWholeHours < 24) {
-        "Сегодня"
-    } else if (duration.inWholeHours in 24..47) {
-        "Вчера"
+    val duration = currentCal.time.time - cal.time.time
+    return if (duration < 86400000) {
+        TODAY
+    } else if (duration in 86400000..2*86400000) {
+        YESTERDAY
     } else {
         "${DateFormat.format("dd.MM.yyyy", cal)}"
     }

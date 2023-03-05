@@ -82,7 +82,6 @@ fun VKAudioRecorderTheme(
     } else {
         DarkColors
     }
-
     MaterialTheme(
         colorScheme = colors,
         typography = Typography,
