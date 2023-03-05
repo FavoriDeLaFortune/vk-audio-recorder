@@ -22,7 +22,20 @@ class LocalRecordRepositoryImpl(private val recordDatabase: RecordDatabase): Loc
         }
     }
 
+    override suspend fun insertRecord(record: Record) = withContext(Dispatchers.IO){
+        recordDatabase.recordDao().insertRecord(record = record.toDatabaseModel())
+    }
+
     private fun RecordRoomEntity.toDomainModel() = Record(
+        id = this.id,
+        title = this.title,
+        date = this.date,
+        duration = this.duration,
+        filePath = this.filePath
+    )
+
+    private fun Record.toDatabaseModel() = RecordRoomEntity(
+        id = this.id,
         title = this.title,
         date = this.date,
         duration = this.duration,

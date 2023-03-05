@@ -1,6 +1,7 @@
 package com.example.vkaudiorecorder
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
@@ -37,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.vkaudiorecorder.data.local.RecordLoadState
+import com.example.vkaudiorecorder.ui.MOCKED_RECORD_LIST
 import com.example.vkaudiorecorder.ui.mappers.dateToString
 import com.example.vkaudiorecorder.ui.mappers.durationToString
 import com.example.vkaudiorecorder.ui.model.Record
@@ -44,6 +46,7 @@ import com.example.vkaudiorecorder.ui.stateholders.RecordViewModel
 import com.example.vkaudiorecorder.ui.theme.VKAudioRecorderTheme
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
+import java.util.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,6 +69,10 @@ fun MainScreen(recordViewModel: RecordViewModel = koinViewModel()) {
     val interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
     val interactions = remember { mutableStateListOf<Interaction>() }
     val recordStateLoad by recordViewModel.recordsStateFlow.collectAsStateWithLifecycle()
+    var selectedRecord by remember { mutableStateOf<Record?>(null) }
+    if (interactions.lastOrNull() is PressInteraction.Press) {
+        selectedRecord = null
+    }
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect { interaction ->
             if (interactions.isNotEmpty()) {
@@ -90,7 +97,11 @@ fun MainScreen(recordViewModel: RecordViewModel = koinViewModel()) {
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items((recordStateLoad as RecordLoadState.Loaded).list) { record ->
-                            RecordItem(record, interactions)
+                            RecordItem(
+                                record = record,
+                                interactions = interactions,
+                                isSelected = record == selectedRecord,
+                                onClick = { isSelected -> selectedRecord = if (isSelected) null else record })
                         }
                     }
                 } else {
@@ -101,19 +112,27 @@ fun MainScreen(recordViewModel: RecordViewModel = koinViewModel()) {
                 Text("Произошла ошибка")
             }
         }
-
     }
-    RecordSurface(interactions = interactions)
-    RecordSaveCard(interactions = interactions)
+    var duration by remember { mutableStateOf(0L) }
+    Log.d("duration_value", "duration: $duration")
+    RecordSurface(interactions = interactions) { _duration -> duration = _duration }
+    RecordSaveCard(viewModel = recordViewModel, interactions = interactions, duration = duration)
     Column(horizontalAlignment = CenterHorizontally) {
         Spacer(modifier = Modifier.weight(1f))
-        RecordButton(interactionSource, interactions)
+        RecordButton(
+            interactionSource = interactionSource,
+            interactions = interactions
+        )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RecordSaveCard(interactions: SnapshotStateList<Interaction>) {
+fun RecordSaveCard(
+    viewModel: RecordViewModel,
+    interactions: SnapshotStateList<Interaction>,
+    duration: Long
+) {
     AnimatedVisibility(
         visible = interactions.lastOrNull() is PressInteraction.Release,
         enter = fadeIn(),
@@ -170,7 +189,18 @@ fun RecordSaveCard(interactions: SnapshotStateList<Interaction>) {
                                 .width(1.dp)
                         )
                         Button(
-                            onClick = { interactions.removeLast() },
+                            onClick = {
+                                viewModel.insertRecord(
+                                    Record(
+                                        title = textState.value.text,
+                                        date = Date().time,
+                                        duration = duration,
+                                        filePath = ""
+                                    )
+                                )
+                                interactions.removeLast()
+                                viewModel.refreshRecords()
+                            },
                             shape = RectangleShape,
                             modifier = Modifier
                                 .fillMaxSize()
@@ -191,8 +221,10 @@ fun RecordSaveCard(interactions: SnapshotStateList<Interaction>) {
 }
 
 @Composable
-fun RecordSurface(interactions: SnapshotStateList<Interaction>) {
-    var ticks by remember { mutableStateOf(0L) }
+fun RecordSurface(
+    interactions: SnapshotStateList<Interaction>,
+    onRelease: (duration: Long) -> Unit
+) {
     AnimatedVisibility(
         visible = interactions.lastOrNull() is PressInteraction.Press,
         enter = fadeIn(),
@@ -210,6 +242,7 @@ fun RecordSurface(interactions: SnapshotStateList<Interaction>) {
                 ),
             horizontalAlignment = CenterHorizontally
         ) {
+            var ticks by remember { mutableStateOf(0L) }
             Spacer(modifier = Modifier.weight(0.55f))
             Column(modifier = Modifier.weight(0.45f), horizontalAlignment = CenterHorizontally) {
                 Text(
@@ -225,10 +258,13 @@ fun RecordSurface(interactions: SnapshotStateList<Interaction>) {
                     ticks++
                 }
             }
+            when (interactions.lastOrNull()) {
+                is PressInteraction.Release -> {
+                    Log.d("duration_value", "ticks: $ticks")
+                    onRelease(ticks)
+                }
+            }
         }
-    }
-    if (interactions.lastOrNull() is PressInteraction.Release || interactions.lastOrNull() is PressInteraction.Cancel) {
-        ticks = 0
     }
 }
 
@@ -258,7 +294,12 @@ fun RecordButton(
 }
 
 @Composable
-fun RecordItem(record: Record, interactions: SnapshotStateList<Interaction>) {
+fun RecordItem(
+    record: Record,
+    interactions: SnapshotStateList<Interaction>,
+    isSelected: Boolean,
+    onClick: (isSelected: Boolean) -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(4.dp),
@@ -291,7 +332,9 @@ fun RecordItem(record: Record, interactions: SnapshotStateList<Interaction>) {
                 modifier = Modifier
                     .size(32.dp)
                     .align(CenterVertically),
-                interactions
+                interactions = interactions,
+                isSelected = isSelected,
+                onClick =  onClick
             )
             Spacer(modifier = Modifier.size(8.dp))
         }
@@ -299,17 +342,21 @@ fun RecordItem(record: Record, interactions: SnapshotStateList<Interaction>) {
 }
 
 @Composable
-fun PlayButton(modifier: Modifier, interactions: SnapshotStateList<Interaction>) {
-    val isPlaying = remember { mutableStateOf(false) }
+fun PlayButton(
+    modifier: Modifier,
+    interactions: SnapshotStateList<Interaction>,
+    isSelected: Boolean,
+    onClick: (isSelected: Boolean) -> Unit
+) {
     Button(
         modifier = modifier,
         shape = CircleShape,
         contentPadding = PaddingValues(4.dp),
-        onClick = { isPlaying.value = !isPlaying.value },
+        onClick = { if (isSelected) onClick(true) else onClick(false) },
         enabled = interactions.lastOrNull() is PressInteraction.Press || interactions.lastOrNull() == null || interactions.lastOrNull() is PressInteraction.Cancel
     ) {
         Icon(
-            imageVector = if (isPlaying.value) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+            imageVector = if (isSelected) Icons.Filled.Pause else Icons.Filled.PlayArrow,
             contentDescription = null,
         )
     }

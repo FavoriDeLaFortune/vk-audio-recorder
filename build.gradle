@@ -6,7 +6,6 @@ buildscript {
         compose_lifecycle = '2.6.0-rc01'
         compose_livedata = '1.4.0-beta01'
         koin_version= '3.2.2'
-        koin_android_version= '3.3.0'
         room_version = '2.5.0'
         coroutines_version = '1.6.4'
     }
