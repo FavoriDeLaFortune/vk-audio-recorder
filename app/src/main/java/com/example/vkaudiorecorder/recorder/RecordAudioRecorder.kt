@@ -3,6 +3,10 @@ package com.example.vkaudiorecorder.recorder
 import android.content.Context
 import android.media.MediaRecorder
 import android.os.Build
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 
@@ -31,8 +35,11 @@ class RecordAudioRecorder(private val context: Context) : AudioRecorder {
     }
 
     override fun stop() {
-        recorder?.stop()
-        recorder?.reset()
-        recorder = null
+        CoroutineScope(Dispatchers.IO).launch {
+            delay(250)
+            recorder?.stop()
+            recorder?.reset()
+            recorder = null
+        }
     }
 }
